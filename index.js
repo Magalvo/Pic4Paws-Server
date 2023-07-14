@@ -13,9 +13,11 @@ import userRoutes from './routes/users.routes.js';
 import postRoutes from './routes/posts.routes.js';
 import { register } from './controllers/auth.js';
 import { createPost } from './controllers/posts.js';
-import { verifyToken } from './middleware/auth.js';
-import User from './models/User.js';
-import Post from './models/Post.js';
+import { isAuthenticated } from './middleware/firebase.middleware.js';
+//import { verifyToken } from './middleware/auth.js';
+
+import User from './models/User.model.js';
+import Post from './models/Posts.model.js';
 import { users, posts } from './data/index.js';
 
 /* CONFIGURATIONS */
@@ -44,8 +46,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
-app.post('/auth/register', upload.single('picture'), register);
-app.post('/posts', verifyToken, upload.single('picture'), createPost);
+//app.post('/auth/register', upload.single('picture'), register);
+//app.post('/posts', isAuthenticated, upload.single('picture'), createPost); //verifyToken
 
 /* ROUTES */
 app.use('/auth', authRoutes);
@@ -73,6 +75,6 @@ mongoose
     console.error('Error connecting to mongo: ', err);
   });
 
-/*     User.insertMany(users);
+/* User.insertMany(users);
     Post.insertMany(posts);
  */

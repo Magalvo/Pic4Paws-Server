@@ -7,15 +7,16 @@ import {
 } from '../controllers/users.js';
 
 import { verifyToken } from '../middleware/auth.js';
+import { isAuthenticated } from '../middleware/firebase.middleware.js';
 
 const router = express.Router();
 
 /* Read */
 
-router.get('/:id', verifyToken, getUser);
-router.get('/:id/friends', verifyToken, getUserFriends);
+router.get('/:id', isAuthenticated, getUser);
+router.get('/:id/friends', isAuthenticated, getUserFriends);
 
 /* Update */
-router.patch('/:id/:friendId', verifyToken, addRemoveFriend);
+router.patch('/:id/:friendId', isAuthenticated, addRemoveFriend);
 
 export default router;
