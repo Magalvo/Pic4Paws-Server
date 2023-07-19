@@ -43,8 +43,8 @@ export const getFeedPosts = async (req, res, next) => {
 
 export const getUserPosts = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    const post = await Post.find({ userId });
+    const { id } = req.params;
+    const post = await Post.find({ id });
     res.status(200).json(post);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -75,6 +75,7 @@ export const likePost = async (req, res, next) => {
 
     res.status(200).json(updatedPost);
   } catch (error) {
+    console.log('An error occurred liking the post:', error);
     res.status(404).json({ message: err.message });
     next(error);
   }

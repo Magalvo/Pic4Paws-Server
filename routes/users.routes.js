@@ -12,9 +12,9 @@ import { isAuthenticated } from '../middleware/firebase.middleware.js';
 const router = express.Router();
 
 /* Read */
-
-router.get('/:id', isAuthenticated, getUser);
-router.get('/:id/friends', isAuthenticated, getUserFriends);
+/* /user/{...} */
+router.get('/:userId', isAuthenticated, getUser);
+router.get('/:userId/friends', isAuthenticated, getUserFriends);
 
 /* Update */
 router.patch('/:id/:friendId', isAuthenticated, addRemoveFriend);

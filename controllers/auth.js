@@ -23,8 +23,6 @@ export const register = async (req, res) => {
       imgUrl
     } = req.body;
 
-    console.log(password);
-
     if (email === '' || password === '') {
       return res.status(418).json({ message: 'All fields are mandatory' });
     }
@@ -76,7 +74,9 @@ export const login = async (req, res, next) => {
 
     if (!user) return res.status(401).json({ msg: 'User does not exist. ' });
 
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch = bcrypt.compareSync(password, user.password);
+
+    const userId = user._id;
 
     if (isMatch) {
       const authToken = await auth.createCustomToken(user._id.toString(), {
@@ -86,7 +86,7 @@ export const login = async (req, res, next) => {
       });
 
       //send the JWT as a response
-      res.json({ authToken });
+      res.json({ authToken, userId });
     } else {
       res.status(400).json({ message: 'Incorrect password' });
     }
@@ -97,11 +97,11 @@ export const login = async (req, res, next) => {
 
 //____________________________GOOGLE______________________________//
 
-export const google = async (req, res) => {
-  const { email, name } = req.body;
+export const google = async (req, res, next) => {
+  const { email, firstName, imgUrl } = req.body;
   try {
     // check if all parameters have been provided
-    if (email === '' || name === '') {
+    if (email === '' || firstName === '') {
       return res.status(400).json({ message: 'All fields are mandatory' });
     }
 
@@ -110,15 +110,21 @@ export const google = async (req, res) => {
       return res.json({ message: 'User already exists' });
     }
 
-    const firstName = name;
-
     await User.create({
       email,
-      firstName
+      firstName,
+      location: '',
+      occupation: '',
+      viewedProfile: 0,
+      impressions: 0,
+      imgUrl:
+        imgUrl ||
+        'https://res.cloudinary.com/djeainpxh/image/upload/v1689514250/Pic4Paws/daydnq3tkar4y5q3r5q2.png'
     });
     res.json({ message: 'User created successfully' });
   } catch (error) {
     console.log('An error occurred login the user', error);
+    next(error);
   }
 };
 

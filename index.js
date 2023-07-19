@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/users.routes.js';
 import postRoutes from './routes/posts.routes.js';
+import petRoutes from './routes/pets.routes.js';
 import { register } from './controllers/auth.js';
 import { createPost } from './controllers/posts.js';
 import { isAuthenticated } from './middleware/firebase.middleware.js';
@@ -35,7 +36,7 @@ app.use(cors());
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 /* FILE STORAGE */
-const storage = multer.diskStorage({
+/* const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/assets');
   },
@@ -43,7 +44,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   }
 });
-const upload = multer({ storage });
+const upload = multer({ storage }); */
 
 /* ROUTES WITH FILES */
 //app.post('/auth/register', upload.single('picture'), register);
@@ -53,6 +54,7 @@ const upload = multer({ storage });
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/posts', postRoutes);
+app.use('/pets', petRoutes);
 
 /* MONGOOSE SETUP */
 const MONGO_URI =

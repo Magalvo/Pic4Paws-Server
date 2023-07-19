@@ -1,10 +1,12 @@
 import User from '../models/User.model.js';
+import mongoose from 'mongoose';
 
 /* READ */
 export const getUser = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const user = await User.findById(id);
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+
     res.status(200).json(user);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -14,8 +16,8 @@ export const getUser = async (req, res, next) => {
 
 export const getUserFriends = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const user = await User.findById(id);
+    const { userId } = req.params;
+    const user = await User.findById(userId);
 
     const friends = await Promise.all(
       user.friends.map(id => User.findById(id))
@@ -35,17 +37,17 @@ export const getUserFriends = async (req, res, next) => {
 /* UPDATE */
 export const addRemoveFriend = async (req, res, next) => {
   try {
-    const { id, friendId } = req.params;
+    const { userId, friendId } = req.params;
 
-    const user = await User.findById(id);
+    const user = await User.findById(userId);
     const friend = await User.findById(friendId);
 
     if (user.friends.includes(friendId)) {
       user.friends = user.friends.filter(id => id !== friendId);
-      friend.friends = user.friends.filter(id => id !== id);
+      friend.friends = user.friends.filter(id => id !== userId);
     } else {
       user.friends.push(friendId);
-      friend.friends.push(id);
+      friend.friends.push(userId);
     }
     await user.save();
     await friend.save();
