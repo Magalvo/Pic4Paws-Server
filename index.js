@@ -15,7 +15,6 @@ import petRoutes from './routes/pets.routes.js';
 import { register } from './controllers/auth.js';
 import { createPost } from './controllers/posts.js';
 import { isAuthenticated } from './middleware/firebase.middleware.js';
-//import { verifyToken } from './middleware/auth.js';
 
 import User from './models/User.model.js';
 import Post from './models/Posts.model.js';
@@ -32,8 +31,15 @@ app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 app.use(morgan('common'));
 app.use(bodyParser.json({ limit: '30mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
-app.use(cors());
 app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
+
+/* CORS CONFIGURATION */
+const FRONTEND_URL = process.env.ORIGIN || 'http://localhost:3000';
+app.use(
+  cors({
+    origin: [FRONTEND_URL]
+  })
+);
 
 /* FILE STORAGE */
 /* const storage = multer.diskStorage({
