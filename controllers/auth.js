@@ -76,15 +76,15 @@ export const login = async (req, res, next) => {
 
     const isMatch = bcrypt.compareSync(password, user.password);
 
-    const userId = user._id;
-
     if (isMatch) {
       const authToken = await auth.createCustomToken(user._id.toString(), {
         _id: user._id,
         email: user.email,
         firstName: user.firstName
       });
+      const userId = user._id;
 
+      const friends = user.friends;
       //send the JWT as a response
       res.json({ authToken, userId });
     } else {

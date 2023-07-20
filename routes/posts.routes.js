@@ -3,7 +3,8 @@ import {
   createPost,
   getFeedPosts,
   getUserPosts,
-  likePost
+  likePost,
+  commentPost
 } from '../controllers/posts.js';
 //import { verifyToken } from '../middleware/auth.js';
 import { isAuthenticated } from '../middleware//firebase.middleware.js';
@@ -16,7 +17,7 @@ const router = express.Router();
 /* {/posts/{...}} */
 router.get('/', isAuthenticated, getFeedPosts);
 
-router.get('/:id/', isAuthenticated, getUserPosts);
+router.get('/:userId', isAuthenticated, getUserPosts);
 
 /* UPLOAD && CREATE POST */
 router.post('/upload', fileUploader.single('file'), UploadPic);
@@ -24,5 +25,7 @@ router.post('/create', createPost);
 
 /* UPDATE */
 router.patch('/:id/like', isAuthenticated, likePost);
+
+router.post('/:id/comment', isAuthenticated, commentPost);
 
 export default router;
