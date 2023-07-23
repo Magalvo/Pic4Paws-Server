@@ -12,6 +12,9 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/users.routes.js';
 import postRoutes from './routes/posts.routes.js';
 import petRoutes from './routes/pets.routes.js';
+import conversationRoutes from './routes/conversations.routes.js';
+import messageRoutes from './routes/messages.routes.js';
+import apiPetRoutes from './routes/apiPet.routes.js';
 import { register } from './controllers/auth.js';
 import { createPost } from './controllers/posts.js';
 import { isAuthenticated } from './middleware/firebase.middleware.js';
@@ -25,6 +28,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
+
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
@@ -61,6 +65,9 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/posts', postRoutes);
 app.use('/pets', petRoutes);
+app.use('/conversations', conversationRoutes);
+app.use('/messages', messageRoutes);
+app.use('/animals', apiPetRoutes);
 
 /* MONGOOSE SETUP */
 const MONGO_URI =

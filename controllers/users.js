@@ -14,6 +14,18 @@ export const getUser = async (req, res, next) => {
   }
 };
 
+export const findByEmail = async (req, res, next) => {
+  const { userEmail } = req.body;
+
+  const user = await User.findOne({ userEmail });
+
+  res.json({
+    email: user.email,
+    firstName: user.firstName,
+    _id: user._id
+  });
+};
+
 export const getUserFriends = async (req, res, next) => {
   try {
     const { userId } = req.params;

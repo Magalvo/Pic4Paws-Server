@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.model.js';
 import auth from '../config/firebase.config.js';
+import mongoose from 'mongoose';
 
 //____________________________REGISTER______________________________//
 
@@ -110,18 +111,24 @@ export const google = async (req, res, next) => {
       return res.json({ message: 'User already exists' });
     }
 
-    await User.create({
+    const newUser = await User.create({
       email,
       firstName,
       location: '',
       occupation: '',
-      viewedProfile: 0,
-      impressions: 0,
+      viewedProfile: Rande,
+      impressions: Rande,
+      friends,
       imgUrl:
         imgUrl ||
         'https://res.cloudinary.com/djeainpxh/image/upload/v1689514250/Pic4Paws/daydnq3tkar4y5q3r5q2.png'
     });
-    res.json({ message: 'User created successfully' });
+
+    res.json({
+      email: newUser.email,
+      firstName: newUser.firstName,
+      _id: newUser._id
+    });
   } catch (error) {
     console.log('An error occurred login the user', error);
     next(error);
