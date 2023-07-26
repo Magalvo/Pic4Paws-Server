@@ -18,9 +18,18 @@ const PetSchema = new Schema(
       default: 'Name'
     },
     location: {
-      type: String,
-      require: true,
-      default: 'Location'
+      type: {
+        lat: {
+          type: Number,
+          required: true
+        },
+        lng: {
+          type: Number,
+          required: true
+        }
+      },
+      required: true,
+      default: { lat: 0, lng: 0 }
     },
     petType: {
       type: String,

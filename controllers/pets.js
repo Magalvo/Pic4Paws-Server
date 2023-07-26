@@ -16,10 +16,13 @@ export const createPet = async (req, res, next) => {
     tags,
     gender,
     age,
-    adoptable
+    adoptable,
+    location
   } = req.body;
 
   console.log(photos);
+
+  const { lat, lng } = location;
 
   try {
     const user = await User.findById(userId);
@@ -28,11 +31,14 @@ export const createPet = async (req, res, next) => {
       petName,
       petType,
       breeds: {
-        primary: primaryBreed,
-        secondary: secondaryBreed || null
+        primary: primaryBreed.name,
+        secondary: secondaryBreed.name || null
       },
       userName: user.firstName,
-      location: user.location,
+      location: {
+        lat,
+        lng
+      },
       petDescription,
       userPicturePath: user.imgUrl,
       photos: photos || [],
@@ -74,7 +80,6 @@ export const updatePet = async (req, res, next) => {
   } = req.body;
 
   try {
-    // Check if provided id is a valid mongoose id
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Specified id is not valid' });
     }
@@ -113,7 +118,6 @@ export const updatePet = async (req, res, next) => {
 
 export const getPets = async (req, res, next) => {
   try {
-    //we need to 'populate' the tasks to get all the info
     const allPets = await Pet.find();
     res.json(allPets);
   } catch (e) {
