@@ -52,6 +52,10 @@ const PetSchema = new Schema(
         default: false
       }
     },
+    breedsId: {
+      primaryId: String,
+      secondaryId: String
+    },
     petDescription: {
       type: String
     },

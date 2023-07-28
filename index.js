@@ -15,6 +15,7 @@ import petRoutes from './routes/pets.routes.js';
 import conversationRoutes from './routes/conversations.routes.js';
 import messageRoutes from './routes/messages.routes.js';
 import apiPetRoutes from './routes/apiPet.routes.js';
+import breedRoutes from './routes/breeds.routes.js';
 import { register } from './controllers/auth.js';
 import { createPost } from './controllers/posts.js';
 import { isAuthenticated } from './middleware/firebase.middleware.js';
@@ -68,6 +69,7 @@ app.use('/pets', petRoutes);
 app.use('/conversations', conversationRoutes);
 app.use('/messages', messageRoutes);
 app.use('/animals', apiPetRoutes);
+app.use('/breeds', breedRoutes);
 
 /* MONGOOSE SETUP */
 const MONGO_URI =

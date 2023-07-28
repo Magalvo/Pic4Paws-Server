@@ -34,6 +34,10 @@ export const createPet = async (req, res, next) => {
         primary: primaryBreed.name,
         secondary: secondaryBreed.name || null
       },
+      breedsId: {
+        primaryId: primaryBreed.id || null,
+        secondaryId: secondaryBreed.id || null
+      },
       userName: user.firstName,
       location: {
         lat,
