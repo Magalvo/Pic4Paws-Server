@@ -5,14 +5,21 @@ import User from '../models/User.model.js';
 
 export const createPost = async (req, res, next) => {
   try {
-    const { userId, description, imgUrl } = req.body;
-    const user = await User.findById(userId);
+    const { description, imgUrl } = req.body;
+    const user = req.authUser || (await User.findById(req.authUserId));
+
+    if (!description?.trim() && !imgUrl) {
+      return res
+        .status(400)
+        .json({ message: 'Post description or image is required' });
+    }
+
     const newPost = new Post({
-      userId,
+      userId: req.authUserId,
       firstName: user.firstName,
       lastName: user.lastName,
       location: user.location,
-      description,
+      description: description?.trim() || '',
       userPicturePath: user.imgUrl,
       imgUrl,
       likes: {},
@@ -20,7 +27,7 @@ export const createPost = async (req, res, next) => {
     });
     await newPost.save();
 
-    const post = await Post.find();
+    const post = await Post.find().sort({ createdAt: -1 });
 
     res.status(201).json(post);
   } catch (error) {
@@ -33,7 +40,7 @@ export const createPost = async (req, res, next) => {
 
 export const getFeedPosts = async (req, res, next) => {
   try {
-    const post = await Post.find();
+    const post = await Post.find().sort({ createdAt: -1 });
     res.status(200).json(post);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -44,7 +51,7 @@ export const getFeedPosts = async (req, res, next) => {
 export const getUserPosts = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const post = await Post.find({ userId });
+    const post = await Post.find({ userId }).sort({ createdAt: -1 });
     res.status(200).json(post);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -57,8 +64,13 @@ export const getUserPosts = async (req, res, next) => {
 export const likePost = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.authUserId;
     const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
     const isLiked = post.likes.get(userId);
 
     if (isLiked) {
@@ -83,36 +95,31 @@ export const likePost = async (req, res, next) => {
 
 export const commentPost = async (req, res, next) => {
   try {
-    const { id } = req.params; // Post ID from the URL params
-    const { userId, commentText } = req.body; // Comment data from the request body
+    const { id } = req.params;
+    const { commentText } = req.body;
+    const userId = req.authUserId;
 
-    // Check if the required data exists
-    if (!userId || !commentText) {
+    if (!commentText?.trim()) {
       return res
         .status(400)
-        .json({ message: 'userId and commentText are required fields.' });
+        .json({ message: 'commentText is a required field.' });
     }
 
-    // Find the post by its ID
     const post = await Post.findById(id);
 
     if (!post) {
       return res.status(404).json({ message: 'Post not found.' });
     }
 
-    // Create the comment object with the required data
     const newComment = {
       userId,
-      comment: commentText
+      comment: commentText.trim()
     };
 
-    // Add the comment to the post's comments array
     post.comments.push(newComment);
 
-    // Save the updated post to the database
     const updatedPost = await post.save();
 
-    // Return the updated post as a response
     res.status(200).json(updatedPost);
   } catch (error) {
     console.log('Error adding the comment:', error);
@@ -123,6 +130,10 @@ export const commentPost = async (req, res, next) => {
 /* UPLOAD */
 export const UploadImg = async (req, res, next) => {
   try {
+    if (!req.file?.path) {
+      return res.status(400).json({ message: 'Image file is required' });
+    }
+
     res.json({ fileUrl: req.file.path });
   } catch (error) {
     res.status(500).json({ message: 'An error occurred uploading the image' });

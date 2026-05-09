@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 
 export const createPet = async (req, res, next) => {
   const {
-    userId,
     petDescription,
     primaryBreed,
     secondaryBreed,
@@ -20,23 +19,29 @@ export const createPet = async (req, res, next) => {
     location
   } = req.body;
 
-  console.log(photos);
-
-  const { lat, lng } = location;
-
   try {
-    const user = await User.findById(userId);
+    if (
+      location?.lat === undefined ||
+      location?.lng === undefined ||
+      Number.isNaN(Number(location.lat)) ||
+      Number.isNaN(Number(location.lng))
+    ) {
+      return res.status(400).json({ message: 'Pet location is required' });
+    }
+
+    const { lat, lng } = location;
+    const user = req.authUser || (await User.findById(req.authUserId));
     const newPet = await Pet.create({
-      userId,
+      userId: req.authUserId,
       petName,
       petType,
       breeds: {
-        primary: primaryBreed.name,
-        secondary: secondaryBreed.name || null
+        primary: primaryBreed?.name,
+        secondary: secondaryBreed?.name || null
       },
       breedsId: {
-        primaryId: primaryBreed.id || null,
-        secondaryId: secondaryBreed.id || null
+        primaryId: primaryBreed?.id || null,
+        secondaryId: secondaryBreed?.id || null
       },
       userName: user.firstName,
       location: {
@@ -64,7 +69,8 @@ export const createPet = async (req, res, next) => {
       _id: newPet._id
     });
   } catch (error) {
-    console.log('An error ocurred creating a new project', next(error));
+    console.log('An error ocurred creating a new pet', error);
+    next(error);
   }
 };
 
@@ -88,11 +94,21 @@ export const updatePet = async (req, res, next) => {
       return res.status(400).json({ message: 'Specified id is not valid' });
     }
 
-    const updatedPet = await Project.findByIdAndUpdate(
+    const pet = await Pet.findById(id);
+
+    if (!pet) {
+      return res.status(404).json({ message: 'No pet found with specified id' });
+    }
+
+    if (pet.userId !== req.authUserId) {
+      return res.status(403).json({ message: 'You cannot edit this pet' });
+    }
+
+    const updatedPet = await Pet.findByIdAndUpdate(
       id,
       {
         petDescription,
-        photos: photos,
+        photos,
         petName,
         petType,
         breeds,
@@ -101,19 +117,19 @@ export const updatePet = async (req, res, next) => {
         age
       },
       {
-        new: true // We need to pass this to receive the updated values
+        new: true
       }
     );
 
     if (!updatedPet) {
       return res
         .status(404)
-        .json({ message: 'No project found with specified id' });
+        .json({ message: 'No pet found with specified id' });
     }
 
     res.json(updatedPet);
   } catch (e) {
-    console.log('An error occurred when updating the project', e);
+    console.log('An error occurred when updating the pet', e);
     next(e);
   }
 };
@@ -154,8 +170,13 @@ export const getPet = async (req, res, next) => {
 export const likePet = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.authUserId;
     const pet = await Pet.findById(id);
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
     const isLiked = pet.likes.get(userId);
 
     if (isLiked) {
@@ -172,8 +193,8 @@ export const likePet = async (req, res, next) => {
 
     res.status(200).json(updatedPet);
   } catch (error) {
-    console.log('An error occurred liking the post:', error);
-    res.status(404).json({ message: err.message });
+    console.log('An error occurred liking the pet:', error);
+    res.status(404).json({ message: error.message });
     next(error);
   }
 };
@@ -186,10 +207,20 @@ export const deletePet = async (req, res, next) => {
       return res.status(400).json({ message: 'specified id is not valid' });
     }
 
+    const pet = await Pet.findById(id);
+
+    if (!pet) {
+      return res.status(404).json({ message: 'No pet found with specified id' });
+    }
+
+    if (pet.userId !== req.authUserId) {
+      return res.status(403).json({ message: 'You cannot delete this pet' });
+    }
+
     await Pet.findByIdAndDelete(id);
-    res.json({ message: `Project with id ${id} was deleted successfully ` });
+    res.json({ message: `Pet with id ${id} was deleted successfully` });
   } catch (e) {
-    console.log('An error occurred deleting the project', e);
+    console.log('An error occurred deleting the pet', e);
     next(e);
   }
 };
@@ -197,6 +228,10 @@ export const deletePet = async (req, res, next) => {
 /* UPLOAD */
 export const UploadImg = (req, res, next) => {
   try {
+    if (!req.file?.path) {
+      return res.status(400).json({ message: 'Image file is required' });
+    }
+
     res.json({ fileUrl: req.file.path });
   } catch (error) {
     res.status(500).json({ message: 'An error occurred uploading the image' });

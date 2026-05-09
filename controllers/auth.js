@@ -108,7 +108,11 @@ export const google = async (req, res, next) => {
 
     const user = await User.findOne({ email });
     if (user) {
-      return res.json({ message: 'User already exists' });
+      return res.json({
+        email: user.email,
+        firstName: user.firstName,
+        _id: user._id
+      });
     }
 
     const newUser = await User.create({
@@ -118,7 +122,7 @@ export const google = async (req, res, next) => {
       occupation: '',
       viewedProfile: Rande,
       impressions: Rande,
-      friends,
+      friends: [],
       imgUrl:
         imgUrl ||
         'https://res.cloudinary.com/djeainpxh/image/upload/v1689514250/Pic4Paws/daydnq3tkar4y5q3r5q2.png'
@@ -137,6 +141,10 @@ export const google = async (req, res, next) => {
 
 export const UploadPic = async (req, res, next) => {
   try {
+    if (!req.file?.path) {
+      return res.status(400).json({ message: 'Image file is required' });
+    }
+
     res.json({ fileUrl: req.file.path });
   } catch (error) {
     res.status(500).json({ message: 'An error occurred uploading the image' });

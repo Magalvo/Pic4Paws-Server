@@ -20,8 +20,8 @@ router.get('/', isAuthenticated, getFeedPosts);
 router.get('/:userId', isAuthenticated, getUserPosts);
 
 /* UPLOAD && CREATE POST */
-router.post('/upload', fileUploader.single('file'), UploadPic);
-router.post('/create', createPost);
+router.post('/upload', isAuthenticated, fileUploader.single('file'), UploadPic);
+router.post('/create', isAuthenticated, createPost);
 
 /* UPDATE */
 router.patch('/:id/like', isAuthenticated, likePost);
